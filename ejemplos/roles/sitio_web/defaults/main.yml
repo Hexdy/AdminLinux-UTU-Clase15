@@ -1,0 +1,8 @@
+---
+# roles/sitio_web/defaults/main.yml — valores POR DEFECTO del rol.
+# Son los mas faciles de pisar: cualquier variable del play les gana.
+# Por eso acá van valores razonables y genéricos, nunca secretos.
+
+banco: "{{ ansible_env.HOME }}/lab-ansible/banco"
+puerto_app: 8080
+entorno: produccion

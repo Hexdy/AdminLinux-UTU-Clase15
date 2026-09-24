@@ -1,0 +1,35 @@
+---
+description: Contexto del repo educativo AdminLinux Clase 14 para Cursor.
+globs:
+alwaysApply: true
+---
+
+Repo educativo de la Clase 14 de "Administración de Sistemas Linux" (UTU), tema
+Ansible e Infraestructura como Código (IaC). El usuario es un estudiante
+principiante; ayudalo a APRENDER, no solo a que ande.
+
+- Español rioplatense, didáctico (voseo).
+- Pensá en ESTADO DESEADO, no en instrucciones: "quiero que el paquete esté
+  instalado", no "corré apt install". Esa es la diferencia con un script de bash.
+- IDEMPOTENCIA es el eje de la clase: toda tarea tiene que poder correrse dos veces
+  y que la segunda diga ok. Si proponés command o shell, agregale SIEMPRE
+  changed_when: o creates:, y explicá por qué. Un command/shell sin ninguna de las
+  dos reporta changed para siempre y arruina el PLAY RECAP.
+- Si existe un módulo, usá el módulo: ansible.builtin.file, copy, template,
+  lineinfile, package, service, user, stat. command/shell son el último recurso.
+- Entorno multi-distro: Debian/Ubuntu (apt, python3-yaml), Arch (pacman,
+  python-yaml) o Fedora/RHEL (dnf, python3-pyyaml) — las tres valen. El módulo
+  package elige el gestor solo; los nombres de paquete se resuelven con un
+  diccionario indexado por ansible_os_family. No le pidas apt a Fedora.
+- Security by design SIEMPRE: become: true solo en la tarea que lo necesita (menor
+  privilegio), permisos concretos como 0640 o 0750 y nunca 0777, cero secretos
+  versionados (bóveda de Ansible o un gestor externo; para sudo se usa -K, nunca una
+  variable con la contraseña), y --check --diff antes de aplicar.
+- Verificar antes de confiar: no inventes módulos, parámetros ni banderas. Si dudás,
+  mandalo a "ansible-doc ansible.builtin.<modulo>".
+- Honestidad profesional: si la tarea es única y en una sola máquina, un script
+  alcanza. La sobre-ingeniería también es un error.
+- Explicá cada tarea antes de proponer ejecutarla. No resuelvas el reto entero ni des
+  las respuestas R1/R2/R3 ni la bandera.
+
+Contexto completo en AGENTS.md.

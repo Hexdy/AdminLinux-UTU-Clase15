@@ -1,0 +1,121 @@
+---
+# comprobar_bandera.yml — ¿tu bandera es la correcta?
+#
+# Tiene DOS puertas, y las dos se tienen que abrir:
+#
+#   PUERTA 1 — la idempotencia.  El servidor de  datos/reto/servidor/  tiene que
+#   haber quedado en el ESTADO DESEADO. Eso solo pasa si tu playbook es
+#   idempotente de verdad: si dejaste el echo >> del playbook heredado, el
+#   hosts_extra va a tener la línea repetida y esta puerta NO se abre.
+#
+#   PUERTA 2 — la bandera.  SECURITY BY DESIGN: el repo NO guarda la bandera en
+#   texto plano. Guarda solo su huella SHA-256 en  secretos/bandera.sha256 .
+#   Este playbook calcula la huella de LO QUE VOS PASÁS y la compara. Es la misma
+#   idea con la que se guardan las contraseñas: nunca el secreto, solo su hash
+#   (para contraseñas de verdad, además, se usa hashing lento con sal: bcrypt/argon2).
+#
+# Uso:
+#   ansible-playbook comprobar_bandera.yml -e "bandera=BANDERA{...}"
+
+- name: Verificar el reto (idempotencia + bandera por hash)
+  hosts: local
+  become: false
+  gather_facts: false
+
+  vars:
+    bandera: ""   # la pasás con  -e "bandera=BANDERA{...}"
+    area: "{{ playbook_dir }}/../datos/reto"
+    linea_esperada: "10.0.10.20 appsrv"
+
+  tasks:
+    - name: Necesito que me pases una bandera
+      ansible.builtin.assert:
+        that:
+          - bandera | length > 0
+        fail_msg: >-
+          Pasame tu bandera así:
+          ansible-playbook comprobar_bandera.yml -e "bandera=BANDERA{...}"
+        quiet: true
+
+    # ------------------------------------------------ PUERTA 1: idempotencia
+    - name: Mirar cómo quedó el servidor
+      ansible.builtin.stat:
+        path: "{{ area }}/servidor/etc/{{ item }}"
+      register: estado
+      loop:
+        - app.conf
+        - hosts_extra
+
+    - name: ¿Está el banco de trabajo armado?
+      ansible.builtin.assert:
+        that:
+          - estado.results[0].stat.exists
+          - estado.results[1].stat.exists
+        fail_msg: >-
+          No encuentro datos/reto/servidor/etc/. Armá el reto primero:
+          ansible-playbook armar_reto.yml -l local
+        quiet: true
+
+    - name: Leer los dos archivos del servidor
+      ansible.builtin.slurp:
+        src: "{{ area }}/servidor/etc/{{ item }}"
+      register: contenido
+      loop:
+        - app.conf
+        - hosts_extra
+
+    # Normalizamos antes de comparar: sacamos líneas vacías, comentarios y
+    # espacios de más. Lo que importa es el ESTADO, no el formato.
+    - name: Quedarme con las líneas útiles del hosts_extra
+      ansible.builtin.set_fact:
+        lineas_host: >-
+          {{ (contenido.results[1].content | b64decode).splitlines()
+             | map('trim')
+             | reject('equalto', '')
+             | reject('match', '#')
+             | map('regex_replace', '\s+', ' ')
+             | list }}
+        texto_conf: "{{ contenido.results[0].content | b64decode }}"
+
+    - name: PUERTA 1 · ¿El servidor quedó en el estado deseado?
+      ansible.builtin.assert:
+        that:
+          - "'modo=produccion' in texto_conf"
+          - estado.results[0].stat.mode == '0640'
+          - (lineas_host | length) == 1
+          - linea_esperada in lineas_host
+        fail_msg: >-
+          ❌ Todavía no. El servidor NO quedó en el estado deseado, así que tu
+          playbook todavía no es idempotente. Revisá (está todo en
+          docs/estado_deseado.md): app.conf tiene que salir de plantillas/app.conf.base
+          (modo=produccion) y quedar en 0640, y hosts_extra tiene que tener UNA
+          sola línea "{{ linea_esperada }}". Si usaste  echo >>  la línea se
+          duplica en cada corrida. Auditá con:
+          ansible-playbook auditar_idempotencia.yml -l local
+        success_msg: "🔓 Puerta 1 abierta: el servidor quedó en el estado deseado."
+        quiet: true
+
+    # ------------------------------------------------ PUERTA 2: la bandera
+    - name: Leer la huella esperada (solo el hash vive en el repo)
+      ansible.builtin.set_fact:
+        hash_esperado: "{{ lookup('file', playbook_dir + '/secretos/bandera.sha256') | trim }}"
+
+    - name: PUERTA 2 · Comparar la huella de tu bandera con la esperada
+      ansible.builtin.assert:
+        that:
+          - (bandera | trim | hash('sha256')) == hash_esperado
+        fail_msg: >-
+          ❌ Esa no es. Revisá las 3 respuestas sobre datos/reto/evidencia/:
+          ¿R1 sale del PLAY RECAP de la SEGUNDA corrida (no de la primera)?
+          ¿R2 cuenta solo las tareas command/shell SIN changed_when ni creates?
+          ¿R3 cuenta la línea EXACTA (grep -c '^...$'), no cualquier línea parecida?
+          Y ojo con el formato: BANDERA{<host>-<numero>-<numero>}, con guiones.
+        success_msg: "✅ ¡BANDERA CORRECTA! Auditaste el playbook y lo dejaste idempotente. 🎉"
+        quiet: true
+
+    - name: Trofeo
+      ansible.builtin.debug:
+        msg:
+          - "🏁 {{ bandera | trim }} — capturada con Ansible."
+          - "Tu playbook es idempotente y el servidor quedó descrito como código."
+          - "Ahora decile la bandera al profe (no hace falta Pull Request)."

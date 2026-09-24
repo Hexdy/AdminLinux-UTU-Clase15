@@ -1,0 +1,41 @@
+---
+# 03_handlers.yml — "si cambiaste la config, ENTONCES reinicia".
+# Corré:  ansible-playbook 03_handlers.yml -i inventario_ejemplo.ini
+#
+# Corrélo dos veces seguidas: la 2da el handler NI APARECE, porque nadie lo notifico.
+# Despues corré con  -e "puerto_app=9090"  y mira como vuelve a dispararse.
+
+- name: Configurar una app y avisar solo si cambio
+  hosts: local
+  become: false
+  gather_facts: true
+
+  vars:
+    banco: "{{ ansible_env.HOME }}/lab-ansible/banco"
+    puerto_app: 8080
+    entorno: produccion
+
+  tasks:
+    - name: Asegurar el directorio de configuracion
+      ansible.builtin.file:
+        path: "{{ banco }}/etc"
+        state: directory
+        mode: "0755"
+
+    - name: Renderizar la configuracion desde la plantilla
+      ansible.builtin.template:
+        src: roles/sitio_web/templates/app.conf.j2
+        dest: "{{ banco }}/etc/app.conf"
+        mode: "0640"          # menor privilegio, no 0777
+      notify: Reiniciar la app demo
+
+    - name: Simular el chequeo de salud
+      ansible.builtin.command: "true"
+      changed_when: false      # esto NO modifica nada, y se lo decimos
+
+  handlers:
+    # Un handler corre AL FINAL del play, UNA sola vez, y SOLO si lo notificaron.
+    # En la vida real acá iria ansible.builtin.service con state: restarted.
+    - name: Reiniciar la app demo
+      ansible.builtin.debug:
+        msg: "Config cambiada -> aca reiniciaria el servicio (segundos de caida)"

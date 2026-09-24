@@ -1,0 +1,76 @@
+$ ansible-playbook provisionar_reto.yml
+#   segunda corrida, a la mañana siguiente, SIN tocar el playbook   (2026-09-19 09:05 -0300)
+
+PLAY [Provisionar el sitio (versión heredada, tal cual quedó)] *****************
+
+TASK [Gathering Facts] *********************************************************
+fatal: [db01]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 10.0.10.31 port 22: No route to host", "unreachable": true}
+ok: [web01]
+ok: [web02]
+ok: [web03]
+
+TASK [Asegurar el directorio de configuración] *********************************
+ok: [web01]
+changed: [web02]
+ok: [web03]
+
+TASK [Crear el directorio de logs] *********************************************
+changed: [web01]
+changed: [web02]
+changed: [web03]
+
+TASK [Dejar la plantilla base de la app] ***************************************
+ok: [web01]
+changed: [web02]
+ok: [web03]
+
+TASK [Copiar la configuración al lugar] ****************************************
+changed: [web01]
+changed: [web02]
+changed: [web03]
+
+TASK [Registrar el host de la app] *********************************************
+changed: [web01]
+changed: [web02]
+changed: [web03]
+
+TASK [Leer la configuración que quedó] *****************************************
+ok: [web01]
+ok: [web02]
+ok: [web03]
+
+TASK [Contar las líneas del hosts_extra] ***************************************
+ok: [web01]
+ok: [web02]
+ok: [web03]
+
+TASK [Marcar el server como provisionado] **************************************
+ok: [web01]
+ok: [web02]
+ok: [web03]
+
+TASK [Resumen de lo que quedó] *************************************************
+ok: [web01] => {
+    "msg": [
+        "Configuración aplicada en /srv/sitio/etc/app.conf",
+        "Líneas en hosts_extra: 6"
+    ]
+}
+ok: [web02] => {
+    "msg": [
+        "Configuración aplicada en /srv/sitio/etc/app.conf",
+        "Líneas en hosts_extra: 10"
+    ]
+}
+ok: [web03] => {
+    "msg": [
+        "Configuración aplicada en /srv/sitio/etc/app.conf",
+        "Líneas en hosts_extra: 8"
+    ]
+}
+
+PLAY RECAP *********************************************************************
+db01                       : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0
+web01                      : ok=10   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+web02                      : ok=10   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+web03                      : ok=10   changed=3    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0

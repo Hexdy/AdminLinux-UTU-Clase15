@@ -1,0 +1,31 @@
+---
+# roles/sitio_web/tasks/main.yml — QUE hace el rol.
+# Fijate que la plantilla se referencia SOLO por su nombre: el rol sabe
+# buscarla en su propia carpeta templates/. Una ventaja concreta de ordenarlo asi.
+
+- name: Asegurar el directorio de configuracion
+  ansible.builtin.file:
+    path: "{{ banco }}/etc"
+    state: directory
+    mode: "0755"
+
+- name: Asegurar el directorio de logs
+  ansible.builtin.file:
+    path: "{{ banco }}/var/log"
+    state: directory
+    mode: "0755"
+
+- name: Renderizar la configuracion del sitio
+  ansible.builtin.template:
+    src: app.conf.j2
+    dest: "{{ banco }}/etc/app.conf"
+    mode: "0640"
+  notify: Reiniciar el sitio web
+
+- name: Registrar el host de la app una sola vez
+  ansible.builtin.lineinfile:
+    path: "{{ banco }}/etc/hosts_extra"
+    line: "10.0.10.20 appsrv-demo"
+    state: present
+    create: true
+    mode: "0644"

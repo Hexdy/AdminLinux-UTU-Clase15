@@ -1,0 +1,7 @@
+---
+# roles/sitio_web/handlers/main.yml — QUE hacer si algo cambio.
+# Corre al final del play, una sola vez, y solo si una tarea lo notifico.
+
+- name: Reiniciar el sitio web
+  ansible.builtin.debug:
+    msg: "La config cambio -> aca iria ansible.builtin.service con state: restarted"

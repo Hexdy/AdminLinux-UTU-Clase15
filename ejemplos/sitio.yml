@@ -1,0 +1,17 @@
+---
+# sitio.yml — cuando el playbook crece, se ordena en ROLES.
+# Fijate que este archivo tiene 8 lineas: toda la logica vive en roles/sitio_web/.
+#
+# Corré:  ansible-playbook sitio.yml -i inventario_ejemplo.ini
+
+- name: Dejar el sitio web como tiene que estar
+  hosts: local
+  become: false
+  gather_facts: true
+
+  roles:
+    - role: sitio_web
+      # Los valores por defecto viven en roles/sitio_web/defaults/main.yml.
+      # Acá los pisás solo para este entorno:
+      puerto_app: 8080
+      entorno: produccion

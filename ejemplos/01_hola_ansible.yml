@@ -1,0 +1,39 @@
+---
+# 01_hola_ansible.yml — el playbook más chico que hace algo útil.
+# Corré:  ansible-playbook 01_hola_ansible.yml -i inventario_ejemplo.ini
+
+- name: Presentarse y dejar un directorio listo
+  hosts: local
+  become: false          # menor privilegio: acá no hace falta sudo
+  gather_facts: true     # esto es el "Gathering Facts" que ves en la salida
+
+  vars:
+    banco: "{{ ansible_env.HOME }}/lab-ansible/banco"
+
+  tasks:
+    - name: Mostrar quien es este host
+      ansible.builtin.debug:
+        msg: >-
+          Soy {{ ansible_hostname }},
+          corro {{ ansible_distribution }} {{ ansible_distribution_version | default('') }}
+          (familia {{ ansible_os_family }})
+
+    - name: Asegurar el directorio de configuracion
+      ansible.builtin.file:
+        path: "{{ banco }}/etc"
+        state: directory
+        mode: "0755"
+
+    - name: Asegurar el directorio de logs
+      ansible.builtin.file:
+        path: "{{ banco }}/var/log"
+        state: directory
+        mode: "0755"
+
+    - name: Avisar donde quedo todo
+      ansible.builtin.debug:
+        msg: "Banco de trabajo listo en {{ banco }}"
+
+# Corrélo DOS veces y mirá el PLAY RECAP:
+#   1ra:  changed=2   (creó los directorios)
+#   2da:  changed=0   (ya estaban -> no tocó nada)  <- IDEMPOTENTE

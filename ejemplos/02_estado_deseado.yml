@@ -1,0 +1,44 @@
+---
+# 02_estado_deseado.yml — la misma cosa hecha MAL y hecha BIEN, para comparar.
+# Corré:  ansible-playbook 02_estado_deseado.yml -i inventario_ejemplo.ini
+# Corrélo DOS veces y mirá cuál de las dos sigue diciendo "changed".
+
+- name: Instruccion vs estado deseado
+  hosts: local
+  become: false
+  gather_facts: true
+
+  vars:
+    banco: "{{ ansible_env.HOME }}/lab-ansible/banco"
+
+  tasks:
+    - name: Asegurar el directorio
+      ansible.builtin.file:
+        path: "{{ banco }}/etc"
+        state: directory
+        mode: "0755"
+
+    # ---------- La forma MAL: una instruccion ----------
+    # 'echo >>' AGREGA. No pregunta, no compara: agrega.
+    # Ansible ademas no tiene forma de saber si cambio algo -> dice changed SIEMPRE.
+    - name: (MAL) Registrar el host a lo bruto
+      ansible.builtin.shell: >-
+        echo "10.0.10.20 appsrv-demo" >> {{ banco }}/etc/hosts_mal
+      changed_when: true      # somos honestos: esto cambia algo cada vez
+
+    # ---------- La forma BIEN: un estado deseado ----------
+    # "quiero que esta linea este". Si ya esta -> ok. Si falta -> changed.
+    - name: (BIEN) Registrar el host una sola vez
+      ansible.builtin.lineinfile:
+        path: "{{ banco }}/etc/hosts_bien"
+        line: "10.0.10.20 appsrv-demo"
+        state: present
+        create: true
+        mode: "0644"
+
+    - name: Mostrar como quedaron los dos archivos
+      ansible.builtin.debug:
+        msg:
+          - "Mira la diferencia con:"
+          - "  wc -l {{ banco }}/etc/hosts_mal {{ banco }}/etc/hosts_bien"
+          - "El de la izquierda crece en cada corrida. El de la derecha, no."

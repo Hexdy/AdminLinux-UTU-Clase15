@@ -1,0 +1,85 @@
+---
+# provisionar_reto.yml  ·  PLAYBOOK HEREDADO — tal cual lo dejó el que se fue.
+#
+# ESTO ES EVIDENCIA, NO UN EJEMPLO A COPIAR.
+# Es el playbook que provisionaba el sitio de la empresa. Anda... pero NO es
+# idempotente: cada vez que lo corrés vuelve a "cambiar" cosas que ya estaban
+# bien, y encima duplica una línea en un archivo. Tu trabajo en el reto es
+# auditarlo y reescribirlo bien.
+#
+# Todo lo que toca vive DENTRO de  {{ area }}  (una carpeta de trabajo tuya).
+# No toca /etc, no instala nada, no usa sudo. Corrélo tranquilo.
+#
+# Cómo lo corrés (parado en  datos/reto/ ):
+#   ansible-playbook provisionar_reto.yml -l local
+#
+# REGLA DE AUDITORÍA que usamos en clase para decir si una tarea es idempotente:
+#   una tarea con  ansible.builtin.command  o  ansible.builtin.shell  es
+#   NO IDEMPOTENTE si no tiene  changed_when:  ni  creates: .
+#   (Los módulos de estado deseado —file, copy, template, lineinfile— ya son
+#   idempotentes solos: comparan y solo tocan si hace falta.)
+
+- name: Provisionar el sitio (versión heredada, tal cual quedó)
+  hosts: local
+  become: false
+  gather_facts: true
+
+  vars:
+    area: "{{ playbook_dir }}/servidor"
+    plantillas: "{{ playbook_dir }}/plantillas"
+
+  tasks:
+    - name: Asegurar el directorio de configuración
+      ansible.builtin.file:
+        path: "{{ area }}/etc"
+        state: directory
+        mode: '0755'
+
+    # TODO(se-fue): esto debería ser el módulo file, pero no tuve tiempo.
+    - name: Crear el directorio de logs
+      ansible.builtin.command:
+        cmd: "mkdir -p {{ area }}/var/log"
+
+    - name: Dejar la plantilla base de la app
+      ansible.builtin.copy:
+        src: "{{ plantillas }}/app.conf.base"
+        dest: "{{ area }}/etc/app.conf.base"
+        mode: '0644'
+
+    # TODO(se-fue): con ansible.builtin.copy quedaba igual y sin "changed" al pedo,
+    # pero el cp de toda la vida también funciona. Ojo: no fija el modo del archivo.
+    - name: Copiar la configuración al lugar
+      ansible.builtin.shell:
+        cmd: "cp {{ area }}/etc/app.conf.base {{ area }}/etc/app.conf"
+
+    # TODO(se-fue): acá iría el módulo lineinfile. Con echo >> se duplica la
+    # línea en cada corrida, ya lo sé, después lo arreglo.
+    - name: Registrar el host de la app
+      ansible.builtin.shell:
+        cmd: 'echo "10.0.10.20 appsrv" >> {{ area }}/etc/hosts_extra'
+
+    # Esta SÍ está bien marcada: solo lee, nunca cambia nada -> changed_when: false
+    - name: Leer la configuración que quedó
+      ansible.builtin.command:
+        cmd: "cat {{ area }}/etc/app.conf"
+      changed_when: false
+      register: config_actual
+
+    # Esta también: cuenta líneas, no modifica -> changed_when: false
+    - name: Contar las líneas del hosts_extra
+      ansible.builtin.shell:
+        cmd: "grep -c . {{ area }}/etc/hosts_extra"
+      changed_when: false
+      register: lineas_hosts
+
+    # Esta usa creates: si el archivo ya existe, Ansible ni la ejecuta -> ok
+    - name: Marcar el server como provisionado
+      ansible.builtin.command:
+        cmd: "touch {{ area }}/etc/.provisionado"
+        creates: "{{ area }}/etc/.provisionado"
+
+    - name: Resumen de lo que quedó
+      ansible.builtin.debug:
+        msg:
+          - "Configuración aplicada en {{ area }}/etc/app.conf"
+          - "Líneas en hosts_extra: {{ lineas_hosts.stdout | default('?') }}"

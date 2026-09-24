@@ -1,0 +1,11 @@
+# hosts_extra  ·  entradas fijas del sitio  ·  servidor websrv
+# Lo arma el playbook de provisión... y le agrega una línea en CADA corrida.
+127.0.1.1 websrv
+10.0.10.20 appsrv
+192.168.50.7 backup01
+10.0.10.20 appsrv
+# 10.0.10.20 appsrv-old   <- quedó del server viejo, comentada por las dudas
+10.0.10.20 appsrv
+10.0.10.20 appsrv-old
+10.0.10.20 appsrv
+172.16.4.9 monitoreo

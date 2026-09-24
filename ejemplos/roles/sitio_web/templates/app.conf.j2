@@ -1,0 +1,19 @@
+# ARCHIVO GENERADO POR ANSIBLE — no lo edites a mano.
+# Si lo tocás acá, la próxima corrida te lo pisa (y eso está bien:
+# la fuente de verdad es el repositorio, no el servidor).
+
+listen = {{ puerto_app }}
+modo   = {{ entorno }}
+host   = {{ ansible_hostname }}
+familia = {{ ansible_os_family }}
+{% if entorno == 'produccion' %}
+debug  = off
+nivel_log = warning
+{% else %}
+debug  = on
+nivel_log = debug
+{% endif %}
+
+# OJO: acá NO ponemos la fecha a propósito.
+# Si pusiéramos {{ '{{' }} ansible_date_time.iso8601 {{ '}}' }}, el archivo cambiaría
+# en cada corrida y el playbook diría "changed" para siempre: chau idempotencia.

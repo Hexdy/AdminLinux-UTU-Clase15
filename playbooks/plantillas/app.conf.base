@@ -1,0 +1,7 @@
+# app.conf.base  ·  configuración base de la app  ·  la versión del equipo
+# Esta es la fuente de verdad: lo que TIENE que quedar en el servidor.
+modo=produccion
+puerto=8080
+registro=journal
+max_conexiones=200
+tiempo_espera=30

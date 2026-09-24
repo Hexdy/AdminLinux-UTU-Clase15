@@ -1,0 +1,102 @@
+---
+# auditar_idempotencia.yml — tu red de seguridad antes de cantar victoria.
+#
+# Mira DOS cosas y te las reporta (no rompe nada, solo lee):
+#   1) Cómo quedó el servidor de  datos/reto/servidor/  vs. el estado deseado.
+#   2) Cuántas tareas de TU playbook  datos/reto/mi_provisionar.yml  usan
+#      command/shell (el candidato número uno a romper la idempotencia).
+#
+# NO te da las respuestas del reto: te dice si tu playbook dejó bien el servidor.
+#
+# Uso (parado en playbooks/):
+#   ansible-playbook auditar_idempotencia.yml -l local
+
+- name: Auditar la idempotencia de tu playbook y el estado del servidor
+  hosts: local
+  become: false
+  gather_facts: false
+
+  vars:
+    area: "{{ playbook_dir }}/../datos/reto"
+    linea_esperada: "10.0.10.20 appsrv"
+
+  tasks:
+    - name: Mirar el servidor y tu playbook
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      register: cosas
+      loop:
+        - "{{ area }}/servidor/etc"
+        - "{{ area }}/servidor/var/log"
+        - "{{ area }}/servidor/etc/app.conf"
+        - "{{ area }}/servidor/etc/hosts_extra"
+        - "{{ area }}/mi_provisionar.yml"
+      loop_control:
+        label: "{{ item | basename }}"
+
+    - name: Leer app.conf (si existe)
+      ansible.builtin.slurp:
+        src: "{{ area }}/servidor/etc/app.conf"
+      register: s_conf
+      when: cosas.results[2].stat.exists
+
+    - name: Leer hosts_extra (si existe)
+      ansible.builtin.slurp:
+        src: "{{ area }}/servidor/etc/hosts_extra"
+      register: s_hosts
+      when: cosas.results[3].stat.exists
+
+    - name: Leer tu playbook (si existe)
+      ansible.builtin.slurp:
+        src: "{{ area }}/mi_provisionar.yml"
+      register: s_pb
+      when: cosas.results[4].stat.exists
+
+    - name: Decodificar lo que se pudo leer
+      ansible.builtin.set_fact:
+        texto_conf: "{{ (s_conf.content | b64decode) if (s_conf.content is defined) else '' }}"
+        texto_hosts: "{{ (s_hosts.content | b64decode) if (s_hosts.content is defined) else '' }}"
+        texto_pb: "{{ (s_pb.content | b64decode) if (s_pb.content is defined) else '' }}"
+
+    - name: Resumir el estado
+      ansible.builtin.set_fact:
+        chk_etc: "{{ cosas.results[0].stat.isdir | default(false) }}"
+        chk_log: "{{ cosas.results[1].stat.isdir | default(false) }}"
+        chk_modo: "{{ (cosas.results[2].stat.mode | default('')) == '0640' }}"
+        chk_prod: "{{ 'modo=produccion' in texto_conf }}"
+        lineas_host: >-
+          {{ texto_hosts.splitlines()
+             | map('trim')
+             | reject('equalto', '')
+             | reject('match', '#')
+             | map('regex_replace', '\s+', ' ')
+             | list }}
+        tiene_playbook: "{{ cosas.results[4].stat.exists }}"
+        crudas: >-
+          {{ texto_pb.splitlines()
+             | select('search', '^\s*-?\s*(ansible\.builtin\.)?(command|shell):')
+             | list | length }}
+        marcadas: >-
+          {{ texto_pb.splitlines()
+             | select('search', '^\s*(changed_when|creates):')
+             | list | length }}
+
+    - name: Informe de auditoría
+      ansible.builtin.debug:
+        msg:
+          - "==========  AUDITORIA DEL RETO  =========="
+          - "ESTADO DESEADO del servidor (datos/reto/servidor/):"
+          - "  {{ '[OK]' if chk_etc | bool else '[--]' }} etc/ existe como directorio"
+          - "  {{ '[OK]' if chk_log | bool else '[--]' }} var/log/ existe como directorio"
+          - "  {{ '[OK]' if chk_prod | bool else '[--]' }} etc/app.conf sale de la base del equipo (modo=produccion)"
+          - "  {{ '[OK]' if chk_modo | bool else '[--]' }} etc/app.conf tiene permisos 0640"
+          - "  {{ '[OK]' if (lineas_host | length) == 1 and linea_esperada in lineas_host else '[--]' }} etc/hosts_extra tiene UNA sola linea util (encontre {{ lineas_host | length }})"
+          - "-----------------------------------------"
+          - "TU PLAYBOOK (datos/reto/mi_provisionar.yml):"
+          - "  {{ '[OK]' if tiene_playbook | bool else '[--]' }} existe"
+          - "  tareas con command/shell: {{ crudas }}  ·  lineas changed_when/creates: {{ marcadas }}"
+          - "  {{ 'OJO: cada command/shell necesita changed_when o creates, si no siempre dice changed.' if (crudas | int) > (marcadas | int) else 'Pinta bien: no te sobran command/shell sin marcar.' }}"
+          - "-----------------------------------------"
+          - "La prueba final la da la 2a corrida. Si dice changed=0, esta:"
+          - "    cd ../datos/reto && ansible-playbook mi_provisionar.yml -l local"
+          - "=========================================="
