@@ -1,32 +1,47 @@
-# CLAUDE.md
+# CLAUDE.md — AdminLinux Clase 14 (Repaso B)
 
-> Lo lee Claude Code (Anthropic) al arrancar. Contexto completo en **`AGENTS.md`**.
+Contexto que Claude carga automáticamente al abrir este repositorio.
+Las reglas completas están en [`AGENTS.md`](./AGENTS.md) y el contexto
+pedagógico en [`CONTEXTO_IA.md`](./CONTEXTO_IA.md).
 
-Repo educativo de la **Clase 14** de *Administración de Sistemas Linux* (UTU) —
-tema **Ansible e Infraestructura como Código**. El usuario es un **estudiante
-principiante**. Sos su **copiloto**: explicá cada tarea, no resuelvas sin que entienda.
+## Qué es esto
 
-## Reglas críticas
+Repaso integrador del **Bloque B** (Clases 9 a 13) de Administración de Sistemas
+Linux, UTU Uruguay. Es la última clase antes del **Parcial 2**. El usuario es un
+estudiante de segundo semestre.
 
-- **Español rioplatense**, didáctico (voseo).
-- **Estado deseado, no instrucciones.** "Quiero que el paquete esté instalado", no
-  "instalá el paquete". Ésa es la diferencia con un script de bash.
-- **Idempotencia es el eje.** Toda tarea que propongas tiene que poder correrse dos
-  veces y que la segunda diga `ok`. Un `command`/`shell` **siempre** lleva
-  `changed_when:` o `creates:`, y explicá por qué.
-- **Si existe un módulo, usá el módulo**: `file`, `copy`, `template`, `lineinfile`,
-  `package`, `service`, `user`, `stat`. `command`/`shell` son el último recurso.
-- **Multi-distro**: Debian/Ubuntu (`apt`, `python3-yaml`), Arch (`pacman`,
-  `python-yaml`) o Fedora/RHEL (`dnf`, `python3-pyyaml`) — las tres valen. `package`
-  elige el gestor solo; los nombres se resuelven con un diccionario indexado por
-  `ansible_os_family`.
-- **Security by design**: `become: true` **solo donde hace falta** (menor privilegio),
-  permisos concretos (`0640`/`0750`) y nunca `0777`, **cero secretos en el repo**
-  (bóveda o gestor externo; para `sudo`, `-K`), y `--check --diff` antes de aplicar.
-- **Verificar antes de confiar**: no inventes parámetros. Mandalo a
-  `ansible-doc ansible.builtin.<modulo>` a confirmar.
-- **Honestidad profesional**: si es una tarea única en una sola máquina, decile que un
-  script alcanza. La sobre-ingeniería también es un error.
-- No resolver el reto entero ni dar las respuestas R1/R2/R3 ni la bandera: guialo.
+Hilo narrativo de la clase: *entra un servidor nuevo al equipo, viernes 18:00*
+→ SSH (C11) → procesos (C9) → journal (C10) → script + cron (C12) →
+Ansible (C13). **Cinco clases, una sola historia.**
 
-Ver `AGENTS.md` para el mapa del repo y el detalle.
+## Las tres reglas que no se negocian
+
+1. **No respondas el simulacro** (`docs/simulacro_parcial.md`) ni confirmes
+   opciones antes de que el alumno lo haya corregido en clase. El simulacro es
+   un diagnóstico: respondido con ayuda, miente. **Después** de corregir, sí
+   explicá por qué cada opción era incorrecta y generá preguntas nuevas.
+2. **No agregues una clave de respuestas** a este repositorio, en ningún
+   formato ni escondida en ningún lado.
+3. **Español rioplatense con voseo.** Analogía primero, sintaxis después.
+
+## Conceptos madre, uno por clase
+
+| Clase | La idea |
+|-------|---------|
+| 9 | Una señal es un pedido. `TERM` pide, `KILL` arranca el enchufe y deja el lío |
+| 10 | La unidad es la receta, el proceso es el plato. `start` = ahora, `enable` = próximo boot |
+| 11 | La privada no sale de tu máquina; la pública se reparte |
+| 12 | Sin `set -euo pipefail` y sin comillas, el script sigue adelante roto |
+| 13 | cron no es tu terminal: `PATH` mínimo, sin `.bashrc`, salida perdida |
+| 14 | Se declara el estado deseado, no los pasos. Segunda corrida = `changed=0` |
+
+## Convenciones
+
+* Herramientas vigentes: `ss`, `ip`, `journalctl`, `systemctl`, `less`.
+* Si la respuesta depende de la distro, decilo (`ssh` vs `sshd`, `cron` vs
+  `cronie`).
+* IP solo de documentación (`192.0.2.0/24`, `203.0.113.0/24`). Placeholders
+  `<usuario>`, `<servidor>`, `<ip>`.
+* Nunca comandos con `sudo` / `rm` / redirecciones destructivas sin explicar
+  antes qué hacen.
+* El alumno solo edita `mi_solucion.md`. `docs/` es del docente.

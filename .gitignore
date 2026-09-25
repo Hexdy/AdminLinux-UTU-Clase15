@@ -1,59 +1,35 @@
-# Git ignora estos archivos: NUNCA se suben al repo.
-# Security by design: mantené secretos y basura fuera del control de versiones.
-
-# --- 🔑 SECRETOS: lo más importante de este repo --------------------------
-# Contraseñas de bóveda (Ansible Vault). Si esto se filtra, se filtra TODO
-# lo que la bóveda protegía. Jamás se versiona.
-vault_pass
-vault_pass*
-.vault_pass*
-*.vault
-
-# Claves privadas (Ansible entra por SSH: acá vive el riesgo real).
-id_*
-# ...pero las PÚBLICAS sí se pueden compartir (son el "candado"):
-!id_*.pub
+# Secretos y configuración local
+.env
+.env.*
+!.env.example
 *.pem
 *.key
-*.ppk
-*_rsa
-*_dsa
-*_ecdsa
-*_ed25519
-!*.pub
+id_rsa
+id_ed25519
 known_hosts
-authorized_keys
-.ssh/
-
-# --- Otros secretos -------------------------------------------------------
-.env
-*.env
-!.env.example
-secrets.*
-*.secret
-*.p12
-*.pfx
-group_vars/*/vault.yml
-host_vars/*/vault.yml
-
-# --- Basura de Ansible ----------------------------------------------------
 *.retry
-.ansible/
-ansible.log
-fact_cache/
 
-# --- Basura del sistema / editor ------------------------------------------
-.DS_Store
-Thumbs.db
-*.swp
-.vscode/
-.idea/
-
+# Salidas y temporales
+*.log
 *.tmp
 *.bak
-__pycache__/
+*.swp
+*~
+/tmp/
+salida/
 
-# Área de trabajo que genera el playbook armar_reto.yml (no se versiona:
-# se regenera con Ansible). La FUENTE del reto vive en playbooks/reto/.
-# Tu mi_provisionar.yml también queda acá: es tuyo, no va al repo.
-datos/reto/
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editores
+.vscode/
+.idea/
+*.code-workspace

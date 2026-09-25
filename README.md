@@ -1,215 +1,126 @@
-# AdminLinux UTU — Clase 14 🤖 Ansible e Infraestructura como Código
+# AdminLinux · Clase 14 — Repaso B: de un servidor a veinte
 
-Repo de práctica de la **Clase 14** de *Administración de Sistemas Linux* (UTU).
-Tema: **automatizar de verdad** — dejar la configuración de un servidor **escrita en un
-archivo** que se versiona, se revisa y se vuelve a aplicar sin romper nada.
+Repositorio de la **Clase 14** de Administración de Sistemas Linux (UTU).
+Es el **repaso integrador del Bloque B** (Clases 9 a 13) y la última clase antes
+del **Parcial 2** (Clase 16, 25 de noviembre).
 
-> 🤔 **Spoiler de la clase**: el `./correr.sh` que venís corriendo desde la Clase 1
-> **es Ansible**. Hoy vas a entender qué carajo hacía. Y vas a escribir el tuyo.
+> **Cinco clases, una sola historia.** Entra un servidor nuevo al equipo, es
+> viernes a las 18:00 y vos lo tenés que dejar andando: entrás por SSH con clave
+> (C11), mirás qué está corriendo (C9), descubrís que un servicio no arranca y
+> leés el journal (C10), escribís un script que hace el diagnóstico solo y lo
+> agendás con cron para que corra todas las noches (C12) y, en vez de repetir
+> todo a mano en los otros 19 servidores, lo declarás una sola vez con Ansible
+> (C13).
 
----
+## El reto de hoy
 
-## 🏁 El reto de hoy (empezalo ya, mientras escuchás)
+**El reto es el simulacro del Parcial 2.** 30 preguntas (20 múltiple opción +
+10 verdadero/falso), **solo, cronometrado en 25 minutos, sin apuntes y sin IA**.
 
-Heredaste una flota de servidores que provisionaba **un compañero que ya no está**. Te
-dejó un playbook que "anda", pero la segunda corrida sigue diciendo `changed`. Algo está
-mal — o alguien tocó un servidor a mano.
+No lleva nota. Lo que importa es que salgas de la clase sabiendo **exactamente**
+qué tenés que estudiar para el 25 de noviembre.
 
-1. **Cloná** el repo (fuera de Drive) y armá el banco de trabajo con Ansible.
-2. **Parte A** — reescribí el playbook heredado hasta que la **2ª corrida dé `changed=0`**.
-3. **Parte B** — sacá **3 respuestas** de la evidencia y armá la bandera.
-4. **Verificá** con `comprobar_bandera.yml` y **decile la bandera al profe**. 🏁
+1. Cloná este repositorio.
+2. Abrí [`docs/simulacro_parcial.md`](./docs/simulacro_parcial.md) y poné el
+   cronómetro.
+3. Volcá tus respuestas en `mi_solucion.md` (hay plantilla acá mismo).
+4. Corregimos en vivo al final de la clase.
+5. Con tus errores en la mano, seguí
+   [`docs/guia_de_estudio.md`](./docs/guia_de_estudio.md).
 
-> **La idempotencia es la condición de victoria**: si tu playbook no es idempotente, el
-> verificador **no te abre la primera puerta**. No alcanza con adivinar los números.
+## Qué hay acá
 
-```bash
-git clone <url> C:\src\AdminLinux-UTU-Clase14
-cd C:\src\AdminLinux-UTU-Clase14\playbooks
-bash comprobar_requisitos.sh          # ¿tenés Ansible? te dice cómo instalarlo
-ansible-playbook armar_reto.yml -l local --check --diff   # simular
-ansible-playbook armar_reto.yml -l local                  # aplicar
-cat ../datos/reto/MISION.txt
-```
+| Archivo | Para qué sirve |
+|---------|----------------|
+| [`docs/mapa_del_bloque.md`](./docs/mapa_del_bloque.md) | El hilo narrativo de las cinco clases: concepto madre, error típico y pregunta que cae, clase por clase |
+| [`docs/simulacro_parcial.md`](./docs/simulacro_parcial.md) | Las 30 preguntas del simulacro |
+| [`docs/chuleta_bloque_b.md`](./docs/chuleta_bloque_b.md) | Una hoja con todo lo del Bloque B: comandos, tablas y trampas |
+| [`docs/guia_de_estudio.md`](./docs/guia_de_estudio.md) | Qué releer según dónde fallaste + estrategia para el día del parcial |
+| [`docs/reto_pull_request.md`](./docs/reto_pull_request.md) | Cómo entregás tu `mi_solucion.md` por Pull Request |
+| `mi_solucion.md` | Plantilla para tus 30 respuestas |
 
-La guía completa: **[`docs/reto_pull_request.md`](./docs/reto_pull_request.md)**.
-El estado deseado: **[`docs/estado_deseado.md`](./docs/estado_deseado.md)**.
+## Preguntas frecuentes
 
-> 🏁 Este reto **no se entrega por Pull Request**: cuando el verificador te dé el tilde
-> verde, **se la decís al profe** (en clase o por el canal del curso).
+<details>
+<summary><b>¿Qué tengo que hacer hoy, exactamente?</b></summary>
 
----
+Tres cosas, en este orden:
 
-## 🗺️ Qué hay acá
+1. Durante la clase, seguir el mapa del bloque y las seis estaciones (cinco por
+   clase + el taller de errores que las cruza). Si algo no te cierra,
+   **preguntá ahí**: es la última clase antes del parcial.
+2. Cuando el docente lo indique, hacer el simulacro **solo y cronometrado**.
+3. Después de la corrección en vivo, anotar **qué clase** tenía cada error y
+   armar tu plan de estudio con `docs/guia_de_estudio.md`.
 
-| Carpeta | Qué encontrás |
-|---|---|
-| [`ejemplos/`](./ejemplos/) | Playbooks chiquitos y comentados: tu primer playbook, el mismo objetivo **mal y bien**, handlers, y un **rol** mínimo. |
-| [`ejercicios/`](./ejercicios/) | 11 ejercicios + soluciones comentadas. |
-| [`docs/`](./docs/) | Chuleta de módulos, glosario de IaC, cómo leer un `PLAY RECAP`, el estado deseado y la guía del reto. |
-| [`playbooks/`](./playbooks/) | 🏁 El reto: el escenario, la evidencia, el auditor y el verificador por hash. |
-| [`CONTEXTO_IA.md`](./CONTEXTO_IA.md) | Resumen para pegarle a una IA cuando le pidas ayuda. |
-
-### Para arrancar
-
-1. **[`docs/glosario_iac.md`](./docs/glosario_iac.md)** — las palabras, en criollo.
-2. **[`docs/chuleta_ansible.md`](./docs/chuleta_ansible.md)** — los 8 módulos que te alcanzan.
-3. **[`ejemplos/02_estado_deseado.yml`](./ejemplos/02_estado_deseado.yml)** — corrélo tres
-   veces y mirá los dos archivos que deja. Ahí se entiende todo.
-4. **[`docs/leer_play_recap.md`](./docs/leer_play_recap.md)** — leer la salida como un profesional.
-
----
-
-## 🧠 Lo mínimo para no perderte
-
-| Idea | En una frase |
-|---|---|
-| **IaC** | La configuración del servidor escrita en un archivo, versionada en Git. La receta, no la memoria del cocinero. |
-| **Estado deseado** | Describís **cómo tiene que quedar**, no los pasos. |
-| **Idempotencia** | Correrlo 1 o 5 veces da lo mismo. El botón del ascensor. |
-| **Sin agente** | No instalás nada en el servidor destino: Ansible entra **por SSH** (C11). |
-| **Inventario** | A quién le hablo. |
-| **Módulo** | La unidad de trabajo (`package`, `copy`, `file`, `service`, `lineinfile`, `user`). |
-| **Playbook** | La receta completa, en YAML. |
-| **Handler** | "Si cambiaste la config, **entonces** reiniciá." |
-| **Rol** | El playbook ordenado en carpetas, reutilizable. |
-| **`--check`** | El simulacro: "decime qué harías, pero no lo hagas". |
-
-La regla que resume la clase:
-
-```
-   1ra corrida                       2da corrida
- +-------------------+             +-------------------+
- | changed=3  ok=5   |  -------\   | changed=0  ok=8   |
- | puso lo que falta |  -------/   | no toco nada      |
- +-------------------+             +-------------------+
-       NORMAL                        IDEMPOTENTE  ✅
-```
-
-Si la **segunda** corrida te dice `changed`, o tu playbook está mal escrito, o
-**alguien tocó el servidor a mano** (desvío de configuración). Las dos cosas
-importan. La segunda es un hallazgo de **seguridad**.
-
----
-
-## 🔒 Seguridad por diseño (lo que se mira en una revisión real)
-
-- 🔴 **Ningún secreto en el repo.** Ni una contraseña, ni un token, ni una clave
-  privada. Si necesitás un dato sensible: **bóveda** (Ansible Vault) o un gestor de
-  secretos externo. Para `sudo`, `-K` (te la pide y no queda escrita).
-- 🔴 **Menor privilegio**: `become: true` **solo en la tarea que lo necesita**, nunca a
-  nivel de play "por las dudas".
-- 🔴 **Permisos concretos**: `0640`, `0750`. Nunca `0777`.
-- 🔴 **`--check --diff` antes de aplicar** algo que no conocés.
-- 🔴 **Revisión por pares**: el playbook está en Git, así que un cambio riesgoso se ve
-  en un Pull Request **antes** de tocar producción. Ése es el verdadero superpoder de IaC.
-- 🔴 La bandera se guarda **hasheada** (SHA-256), nunca en claro. Igual que las
-  contraseñas de verdad.
-
-El `.gitignore` de este repo ya excluye `*.key`, `*.pem`, `id_*`, `vault_pass*` y `.env`.
-
----
-
-## 🤖 IA con criterio
-
-Un asistente te escribe un playbook en 5 segundos. También te **inventa parámetros que
-no existen** con total seguridad. Antes de aplicar cualquier cosa que te sugiera:
-
-```bash
-ansible-doc ansible.builtin.copy          # ¿existe ese parámetro? te lo dice offline
-ansible-playbook mi.yml --syntax-check    # ¿el YAML está bien?
-ansible-playbook mi.yml --check --diff    # ¿qué haría exactamente?
-```
-
-**Verificar antes de confiar.** Tres comandos, menos de un minuto, cero incidentes.
-
----
-
-## 🧩 Autoevaluación (5 preguntas, sin respuestas)
-
-Contestalas **antes** de mirar los docs. Si te trabás, abrí la pista.
-
-### 1️⃣ Cocinar de memoria
-
-Un compañero configuró el servidor de producción a mano, anotó los pasos en un papel y
-se fue de la empresa. ¿Qué **tres** problemas concretos tenés ahora que no tendrías si
-esa configuración estuviera escrita como código en el repo?
-
-<details><summary>💡 Pista</summary>
-
-Pensá qué pasa cuando (a) necesitás un servidor idéntico mañana, (b) alguien quiere
-saber **por qué** está así, y (c) el disco se muere el sábado a la noche. La receta
-escrita no solo te dice el cómo: también deja registro de **quién** la cambió y **cuándo**.
-
+El simulacro **no lleva nota**. Si lo hacés con ayuda, el resultado te miente y
+vas a estudiar lo que no era.
 </details>
 
-### 2️⃣ El ascensor
+<details>
+<summary><b>No me acuerdo de nada de una de las clases. ¿Por dónde empiezo?</b></summary>
 
-Tu compañero dice: *"este playbook es idempotente porque no falla si lo corrés dos
-veces"*. Está mezclando dos cosas. ¿Qué es **realmente** ser idempotente, y cuál es la
-prueba concreta que mirás en la salida?
+Por el mapa, no por el apunte. Abrí
+[`docs/mapa_del_bloque.md`](./docs/mapa_del_bloque.md) y leé el **concepto
+madre** de esa clase: es una sola idea. Si esa idea te vuelve, seguí con la
+sección de la clase en [`docs/chuleta_bloque_b.md`](./docs/chuleta_bloque_b.md).
 
-<details><summary>💡 Pista</summary>
-
-Apretar el botón del ascensor cinco veces no lo hace venir cinco veces. "No falla" y
-"no hace nada porque ya está como pedí" son cosas distintas. La prueba está en una
-columna del `PLAY RECAP` de la **segunda** corrida.
-
+Recién si la chuleta tampoco te dice nada, volvé al apunte completo de esa clase
+y rehacé su ejercicio. Leer el apunte de punta a punta sin haber entendido el
+concepto madre es la forma más lenta de estudiar.
 </details>
 
-### 3️⃣ El `changed` sospechoso
+<details>
+<summary><b>¿Puedo usar IA para el simulacro?</b></summary>
 
-Un playbook que hace tres meses da siempre `changed=0` hoy te reporta `changed=1` en una
-tarea. Nadie tocó el repo. ¿Cuáles son las **dos** explicaciones posibles, cómo las
-distinguís, y por qué una de las dos es un hallazgo de **seguridad**?
+**Para el simulacro, no.** El simulacro es un termómetro: si lo respondés con
+ayuda, te vas a llevar un diagnóstico falso y vas a estudiar lo que no hacía
+falta. El parcial va a ser sin IA, así que el ensayo también.
 
-<details><summary>💡 Pista</summary>
+**Después de corregir, sí.** Ahí la IA es excelente para lo que más cuesta
+solo: pedirle que te **explique por qué** una opción era incorrecta, que te
+invente variantes del mismo escenario con otros números, o que te tome preguntas
+nuevas sobre el tema que fallaste.
 
-Si el código no cambió, cambió **el servidor**. Hay una bandera de la línea de comandos
-que te muestra el antes y el después sin tocar nada: si el contenido es realmente
-distinto, alguien escribió ahí sin pasar por el proceso. Eso tiene nombre propio.
-
+Regla que ya conocés de todo el curso: nunca ejecutes un comando con `sudo`,
+`rm` o redirecciones sin entender antes qué hace. La IA se equivoca con
+confianza.
 </details>
 
-### 4️⃣ El último recurso
+<details>
+<summary><b>¿Cómo entrego?</b></summary>
 
-Tenés que correr un comando para el que **no** hay módulo. ¿Qué le agregás a la tarea
-para que no reporte `changed` en cada corrida? Hay **dos** parámetros válidos: nombralos
-y decí cuándo usarías cada uno.
+Por Pull Request, igual que siempre — y por eso mismo no es solo un trámite:
+es la última práctica del flujo Git antes del parcial.
 
-<details><summary>💡 Pista</summary>
+Está todo paso a paso en
+[`docs/reto_pull_request.md`](./docs/reto_pull_request.md): fork, rama con tu
+nombre, `mi_solucion.md` completo, commit y PR contra este repositorio.
 
-Uno sirve cuando el comando **produce un artefacto** (si ya existe, ni lo corras). El
-otro sirve cuando vos sabés que el comando **no modifica nada** (una consulta, un
-`--version`) o podés deducir el cambio leyendo su salida. Los dos están en la chuleta.
-
+La entrega **no lleva nota**. Sirve para que el docente vea, sobre el grupo
+entero, qué temas quedaron flojos y pueda reforzarlos antes del 25 de noviembre.
 </details>
 
-### 5️⃣ Cuándo NO
+<details>
+<summary><b>¿Qué entra en el Parcial 2?</b></summary>
 
-Te piden comprimir los logs de ayer, **una sola vez**, en **una sola** máquina, y no se
-va a repetir. ¿Montás inventario + playbook + roles? Justificá, y decí a partir de qué
-momento sí conviene el playbook.
+Todo lo de las **Clases 9 a 13**: procesos y señales, systemd y journalctl, SSH,
+shell scripting completo (con `cron` y los timers), Ansible e IaC.
 
-<details><summary>💡 Pista</summary>
+**No entra** el Bloque A (Clases 1 a 7: eso ya se evaluó en el Parcial 1), ni
+temas que no vimos (expresiones regulares complejas, Ansible Vault, roles de
+Galaxy, contenedores), ni memorizar de taquito un `.service` completo o un
+`ansible.cfg`. Sí entra **entender** qué hace cada directiva que sí vimos.
 
-Pensá en tres preguntas: ¿lo voy a **repetir**? ¿lo va a correr **otro**? ¿necesito que
-quede **registro** de qué se hizo? Si las tres son "no", la herramienta grande es
-sobre-ingeniería — y eso también es un error profesional.
-
+El formato es el mismo del simulacro: 20 múltiple opción + 10 verdadero/falso,
+individual, sin apuntes y sin IA. Algunas preguntas del simulacro reaparecen tal
+cual; la mayoría son nuevas sobre los mismos temas con otros escenarios, así que
+memorizar las respuestas **no alcanza**.
 </details>
 
----
+## Licencia y uso
 
-## 🎯 Por qué esta clase importa para trabajar
-
-"Sé Ansible" es de las cosas que más pesan en un CV junior de sistemas. Los puestos que
-lo piden por nombre: **administración de sistemas**, **DevOps**, **SRE**, **ingeniería
-de plataforma**. Y lo que hiciste hoy — heredar algo mal documentado, dejarlo idempotente
-y versionado — es **literalmente** la primera tarea que te van a dar.
-
-De paso vas a escuchar nombrar otras familias de herramientas del ecosistema
-(aprovisionamiento de infraestructura, contenedores, canalizaciones de CI/CD). Hay
-**varias** opciones en cada una; lo que se transfiere es el concepto, no el producto.
-
-Y el cierre del círculo: **el playbook vive en un repositorio**. Git no era un trámite.
+Material docente de UTU para uso educativo. Las IP que aparecen en los ejemplos
+son de documentación (`192.0.2.0/24`, `203.0.113.0/24`) y no corresponden a
+ningún sistema real. No subas credenciales, tokens ni claves privadas a este
+repositorio.
