@@ -18,8 +18,8 @@ entero, qué temas quedaron flojos y los refuerce antes del parcial.
 
 ```bash
 # 1. Fork desde la web de GitHub (boton "Fork"), y despues:
-git clone https://github.com/<tu-usuario>/AdminLinux-UTU-Clase14.git
-cd AdminLinux-UTU-Clase14
+git clone https://github.com/<tu-usuario>/AdminLinux-UTU-Clase15.git
+cd AdminLinux-UTU-Clase15
 
 # 2. Rama propia
 git checkout -b entrega/<tu-apellido>

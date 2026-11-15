@@ -1,4 +1,4 @@
-## Entrega — Simulacro del Parcial 2 (Clase 14)
+## Entrega — Simulacro del Parcial 2 (Clase 15)
 
 **Nombre y apellido:**
 

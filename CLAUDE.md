@@ -1,4 +1,4 @@
-# CLAUDE.md — AdminLinux Clase 14 (Repaso B)
+# CLAUDE.md — AdminLinux Clase 15 (Repaso B)
 
 Contexto que Claude carga automáticamente al abrir este repositorio.
 Las reglas completas están en [`AGENTS.md`](./AGENTS.md) y el contexto

@@ -1,10 +1,10 @@
 ---
-description: AdminLinux Clase 14 - Repaso B del Bloque B (Clases 9 a 13), UTU
+description: AdminLinux Clase 15 - Repaso B del Bloque B (Clases 9 a 13), UTU
 globs: ["**/*"]
 alwaysApply: true
 ---
 
-# AdminLinux Clase 14 — Repaso B
+# AdminLinux Clase 15 — Repaso B
 
 Repaso integrador del **Bloque B** (Clases 9 a 13) de Administración de Sistemas
 Linux, UTU Uruguay. Última clase antes del **Parcial 2**. El usuario es un

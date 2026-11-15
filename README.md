@@ -1,6 +1,6 @@
-# AdminLinux · Clase 14 — Repaso B: de un servidor a veinte
+# AdminLinux · Clase 15 — Repaso B: de un servidor a veinte
 
-Repositorio de la **Clase 14** de Administración de Sistemas Linux (UTU).
+Repositorio de la **Clase 15** de Administración de Sistemas Linux (UTU).
 Es el **repaso integrador del Bloque B** (Clases 9 a 13) y la última clase antes
 del **Parcial 2** (Clase 16, 25 de noviembre).
 

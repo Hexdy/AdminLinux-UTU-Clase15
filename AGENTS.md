@@ -1,4 +1,4 @@
-# AGENTS.md — AdminLinux Clase 14 (Repaso B)
+# AGENTS.md — AdminLinux Clase 15 (Repaso B)
 
 Reglas para cualquier agente de IA que trabaje sobre este repositorio.
 El contexto completo está en [`CONTEXTO_IA.md`](./CONTEXTO_IA.md): **leelo

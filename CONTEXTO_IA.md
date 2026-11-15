@@ -1,11 +1,11 @@
-# Contexto para asistentes de IA — AdminLinux Clase 14
+# Contexto para asistentes de IA — AdminLinux Clase 15
 
 > Leé esto antes de ayudar a alguien con este repositorio. Define qué es esta
 > clase, cómo se ayuda y, sobre todo, **cuándo no se ayuda**.
 
 ## Qué es este repositorio
 
-Material de la **Clase 14 de Administración de Sistemas Linux** (UTU, Uruguay).
+Material de la **Clase 15 de Administración de Sistemas Linux** (UTU, Uruguay).
 Docente: Ulyses García. Es el **repaso integrador del Bloque B** (Clases 9 a 13),
 la última clase antes del **Parcial 2** (Clase 16, 25 de noviembre).
 

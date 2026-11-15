@@ -1,4 +1,4 @@
-# Instrucciones para GitHub Copilot — AdminLinux Clase 14
+# Instrucciones para GitHub Copilot — AdminLinux Clase 15
 
 Repositorio del **repaso integrador del Bloque B** (Clases 9 a 13) de
 Administración de Sistemas Linux, UTU Uruguay. Última clase antes del
